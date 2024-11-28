@@ -37,30 +37,36 @@ Training of the prompt generator is follows the work of [IDPG: An Instance-Depen
 
 ### Installation
 
-1. Download [Musique](https://github.com/StonyBrookNLP/musique?tab=readme-ov-file#data) repository and place in `musique/` directory
-2. Copy Musique data files and `data/` directory
+1. Install neccessary packages
     ```
-    train_v.1.0.json
+    pip install -r requirements.txt
     ```
-2. Download [paraphrased single hop questions](link) and place in `data/` directory
-2. Install dependencies:
+2. Download [Musique](https://github.com/StonyBrookNLP/musique) repository. The evaluate script provided in the Musique dataset is used for evaluation. Install the [dependencies](https://github.com/StonyBrookNLP/musique#installations). The an updated evaluate file needs to be download so that the evaluate function imported in our code. 
+    ```
+    !git clone https://github.com/StonyBrookNLP/musique.git
+    !wget https://drive.google.com/file/d/1EpK3p25cYbsNzx4pz_qjzYd5CN1Z15fG/view?usp=drive_link
+    !mv evaluate_v1.py musique/evaluate_v1.py
+    ```
+2. Install Musique related packages :
    ```bash
+   cd musique/
    pip install -r requirements.txt
    ```
+2. Download [paraphrased single hop questions](https://drive.google.com/drive/folders/1of2Iy8DrQ6BDeOZc8zWUkiU0LHRKiLry?usp=sharing) and place in `data/` directory
 
 ## Question Generation Training and Evaluation
 
 1. **Training**: 
     To train the IDP model, run:
    ```bash
-   sh experiment_t5_shqg_idp.sh
+   sh train_qg_idp.sh
    ```
 
 2. **Evaluation**: 
     To generate sub-questions for the musique dataset, run:
    ```bash
-   sh experiment_idpg.sh
-   sh evaluate_qg_idp.sh
+   sh evaluate_qg_idp.sh # Instance driven prompt generation
+   sh evaluate_qg_ft.sh # Finetuning and Task Specific Prompts
    ```
 
 3. **Pre-trained Models**:
@@ -70,22 +76,13 @@ Training of the prompt generator is follows the work of [IDPG: An Instance-Depen
     |---------------------------------------|-------------------------|------------------------------------------------|
     | **Instance-dependent prompts (0.5M)** | IDPG Question Generator | [Link](https://huggingface.co/abiantonio/musique-shqg-idp-500k) |
     | **Instance-dependent prompts (2.5M)** | IDPG Question Generator | [Link](https://huggingface.co/abiantonio/musique-shqg-idp-3M)   |
-    | **Task-specific prompts**             | Prefix Tuning           | [Link](https://huggingface.co/abiantonio/musique-shqg-pt)       |
-    | **Fine-Tuning**                       | Finetuning              | [Link](https://huggingface.co/abiantonio/musique-shqg-ft)       |
+    | **Task-specific prompts**             | Prefix Tuned Question Generator | [Link](https://huggingface.co/abiantonio/musique-shqg-pt)       |
+    | **Fine-Tuning**                       | Finetuned Question Generator    | [Link](https://huggingface.co/abiantonio/musique-shqg-ft)       |
+    | **Single-Hop QA Model**               | QA model trained on single-hop questions | [Link](https://huggingface.co/abiantonio/shqa-ft-p3-unifiedqa-musique) |
 
-    > **Note:** Make sure to place the downloaded models in the `models/` directory before running the code.
 
 ## Question Answering Training and Evaluation
-1. **Installation**: 
-    The evaluate script provided in the Musique dataset is used for evaluation. Install the dependencies as listed in the [Musique repository](https://github.com/StonyBrookNLP/musique#installations)
-
-2. **Single-hop QA Training**: 
-    To train a single-hop QA model, run:
-    ```bash
-    sh experiment_t5_shqa_ft.sh
-    ```
-
-3. **Multi-hop QA Evaluation**:  
+1. **Multi-hop QA Evaluation**:  
     Use the generated question decompositions for multi-hop question answering:
    ```bash
    python inference_t5_nhop_qa_viashqg.py --qa_model_checkpoint <path to trained SHQA model> --qg_model_checkpoint <path to trained QG model>
@@ -93,10 +90,10 @@ Training of the prompt generator is follows the work of [IDPG: An Instance-Depen
 
    To use our trained models
    ```bash
-   python inference_t5_nhop_qa_viashqg.py --qa_model_checkpoint abiantonio/shqa-ft-p3-unifiedqa-musique--qg_model_checkpoint abiantonio/musique-shqg-idp-3M
+   python inference_t5_nhop_qa_viashqg.py --qa_model_checkpoint abiantonio/shqa-ft-p3-unifiedqa-musique --qg_model_checkpoint abiantonio/musique-shqg-idp-3M --use_gold_context --base_path <BASE_PATH> --experiment_name "test" --do_predict --eval_all 
    ```
 
-4. **Multi-hop QA Evalution using Meta's Llama2**:
+2. **Multi-hop QA Evalution using Meta's Llama2**:  
     Make sure you have access to Llama2 via huggingface and set your huggingface credentials
     ```bash
     huggingface-cli login --token $HUGGINGFACE_TOKEN
@@ -125,8 +122,6 @@ Training of the prompt generator is follows the work of [IDPG: An Instance-Depen
 
 **Table:** Comparison of question decomposition performance between in-context few-shot learning methods, finetuning, prefix tuning, and instance-dependent prompting (IDP).
 
-Here's the converted Markdown table:
-
 | Method                     | ans-f1 | sup-f1 | sup-recall |
 |----------------------------|--------|--------|------------|
 | gold                       | 61.6   | 54.7   | 93.0       |
@@ -149,15 +144,3 @@ Here's the converted Markdown table:
 <img src="img/hpo_parameters.png" width="50%">
 
 **Figure:** Impact of Prompt Length and Hidden Size Configurations on Model Parameter Size. h is hidden size and l is prompt length.
-
-## Repository Structure
-
-- `configs/` - Configuration files for training and evaluation
-- `data/` - Directory for dataset storage
-- `src/` - Source code for model, data processing, and utility functions
-- `scripts/` - Helper scripts for data preprocessing and analysis
-- `results/` - Folder to store evaluation metrics and generated outputs
-- `train.py` - Script to train the model
-- `evaluate.py` - Script to evaluate model performance
-
-Feel free to ask if you need further customization or more detailed explanations on any part of the README.
