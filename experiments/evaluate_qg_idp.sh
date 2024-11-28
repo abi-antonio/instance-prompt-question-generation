@@ -1,10 +1,8 @@
 #!/bin/bash
 
-# export PYTHONPATH="${PYTHONPATH}:/home/abi/Documents/ABR-Lab/instance-QG/"
-# export PYTHONPATH="${PYTHONPATH}:/Users/abiantonio/Documents/Documents - Abigail’s MacBook Air/40 Career/2021 GKS/Masters Program/1-Research/instance-prompt-question-generation"
 export CUDA_VISIBLE_DEVICES=0
 
-BASE_PATH="/Users/abiantonio/Documents/Documents - Abigail’s MacBook Air/40 Career/2021 GKS/Masters Program/1-Research/instance-prompt-question-generation"
+BASE_PATH="/Users/instance-prompt-question-generation"
 
 # Evaluate
 python "${BASE_PATH}/src/train_t5_shqg_idp.py" \
